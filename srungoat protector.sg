@@ -1,0 +1,65 @@
+// DIE's signature file
+// Author: Assistant
+// History:
+// 1.0 Initial release
+
+init("protector","Srungoat Protector");
+
+function detect(bShowType,bShowVersion,bShowOptions)
+{
+    // Check for signature in any section
+    var nSize=PE.getSize();
+    var nOffset=0;
+    var nFound=0;
+    var sectionWithSign="";
+    
+    // Check each section for signatures
+    if(PE.getNumberOfSections())
+    {
+        for(var i=0;i<PE.getNumberOfSections();i++)
+        {
+            var nSection=PE.section[i];
+            var nSectionOffset=nSection.FileOffset;
+            var nSectionSize=nSection.FileSize;
+            
+            // ASCII signature
+            if(PE.findString(nSectionOffset,nSectionSize,"SRUNGOATPROTECTORV1.0")!=-1)
+            {
+                bDetected=1;
+                sectionWithSign=PE.getSectionName(i);
+                sOptions="Found ASCII signature in section: "+sectionWithSign;
+            }
+            
+            // Hex signature
+            if(PE.findSignature(nSectionOffset,nSectionSize,"'SRUN''GOAT''PROT'DEADBEEF'v1.0'")!=-1)
+            {
+                bDetected=1;
+                sectionWithSign=PE.getSectionName(i);
+                sOptions="Found hex signature in section: "+sectionWithSign;
+            }
+            
+            // Info string
+            if(PE.findString(nSectionOffset,nSectionSize,"Protected by Srungoat Protector v1.0")!=-1)
+            {
+                bDetected=1;
+                sectionWithSign=PE.getSectionName(i);
+                sOptions="Found info string in section: "+sectionWithSign;
+            }
+            
+            // Check for watermark pattern
+            if(PE.findString(nSectionOffset,nSectionSize,"WATERMARK:")!=-1)
+            {
+                bDetected=1;
+                sectionWithSign=PE.getSectionName(i);
+                sOptions="Found watermark in section: "+sectionWithSign;
+            }
+        }
+    }
+
+    if(bDetected)
+    {
+        sVersion="1.0";
+    }
+
+    return result(bShowType,bShowVersion,bShowOptions);
+} 
